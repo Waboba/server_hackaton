@@ -1,0 +1,6 @@
+# Paquetes extra para tu solución, uno por línea.
+# cv2 (opencv-python-headless) y numpy YA están instalados: no hace falta
+# declararlos y no cuentan para el límite de 10 paquetes.
+#
+# Ejemplo:
+# scikit-image==0.23.2

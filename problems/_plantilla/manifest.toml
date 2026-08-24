@@ -1,0 +1,61 @@
+# Plantilla de problema. Copia esta carpeta con el nombre de tu problema:
+# el slug debe coincidir exactamente con el nombre de la carpeta.
+#
+# Este ejemplo no usa datasets: los casos de prueba están en evaluator.py.
+# Sirve para comprobar que todo el circuito funciona sin datos externos.
+
+slug = "_plantilla"
+title = "Problema de ejemplo"
+description = "Ordena una lista de números lo más rápido posible."
+enabled = true
+ranking = "best"          # "best" = cuenta el mejor run; "last" = el último
+
+statement = """
+Entrega un solution.py que defina:
+
+    def main(numeros: list[int]) -> list[int]
+
+Debe devolver la lista ordenada de menor a mayor.
+Se puntúa la corrección y, en caso de empate, la rapidez.
+"""
+
+
+[submission]
+max_packages = 5
+preinstalled = []
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "main"
+help = "debe definir main(numeros) y devolver la lista ordenada"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra (opcional)"
+
+
+# Sin datasets: la sección se deja vacía.
+[datasets]
+
+
+[limits]
+timeout_secs = 120
+memory = "1g"
+cpus = "1"
+pids = 128
+cooldown_mins = 1
+
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = []
+pip_packages = []
+
+
+[params]
+casos = 200
+tamano_maximo = 2000
+semilla = 12345

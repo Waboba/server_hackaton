@@ -1,0 +1,112 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Problema: modificación de huellas dactilares.
+#
+# Todo lo que el sistema necesita saber sobre este reto está aquí. Para crear
+# otro problema, copia problems/_plantilla/ y ajusta este archivo.
+# ═══════════════════════════════════════════════════════════════════════════
+
+slug = "fingerprint"
+title = "Modificación de huellas dactilares"
+description = "Modifica cada huella para que A' la acepte y B' la rechace."
+enabled = true
+
+# "last" = cuenta el último run completado (comportamiento histórico)
+# "best" = cuenta el mejor run de cada equipo
+ranking = "last"
+
+statement = """
+Entrega un solution.py que defina:
+
+    def main(image: np.ndarray) -> np.ndarray
+
+image llega como numpy array uint8 en escala de grises y debes devolver otro
+numpy array uint8 en escala de grises.
+
+La imagen modificada se compara contra la original con dos algoritmos:
+  A'  acepta si su score supera el umbral A
+  B'  acepta si su score supera el umbral B
+
+El objetivo es que A' acepte y B' rechace.
+
+Se evalúa sobre tres datasets:
+  k    todas las imágenes (público)
+  k4   una muestra aleatoria, distinta en cada ejecución
+  k5   todas las imágenes; solo puntúa si el 100 % sale A'✓ B'✗
+
+Dentro del contenedor no hay acceso a internet.
+"""
+
+
+# ── Qué entregan los participantes ──────────────────────────────────────────
+
+[submission]
+max_packages = 10
+# Ya instalados en la imagen: no cuentan para el límite de paquetes
+preinstalled = ["numpy", "opencv-python-headless", "opencv-python"]
+# Se eliminan del requirements.txt: chocan con la versión headless de la imagen
+strip_packages = ["opencv-python"]
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "main"
+help = "debe definir main(image) y devolver un numpy array en escala de grises"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra, uno por línea (cv2 y numpy ya vienen instalados)"
+
+
+# ── Datasets (se montan read-only en el contenedor) ─────────────────────────
+# Rutas relativas a esta carpeta. Con la estructura original del proyecto,
+# ../../../fingers/k equivale a <raíz-del-proyecto>/../fingers/k
+
+[datasets]
+k  = "../../../fingers/k"
+k4 = "../../../fingers/k4"
+k5 = "../../../fingers/k5"
+
+
+# ── Límites de ejecución ────────────────────────────────────────────────────
+
+[limits]
+timeout_secs = 600
+memory = "3g"
+cpus = "1"
+pids = 256
+cooldown_mins = 5
+
+
+# ── Imagen Docker ───────────────────────────────────────────────────────────
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = ["libgl1", "libglib2.0-0"]
+pip_packages = ["opencv-python-headless", "numpy"]
+
+
+# ── Parámetros del evaluador y del score ────────────────────────────────────
+# Llegan tal cual a evaluate(ctx) como ctx.params y a scoring.py como params.
+
+[params]
+# score = w[0]*SIFT + w[1]*ORB + w[2]*FFT   (los pesos deben sumar 1.0)
+weights_a = [0.4, 0.6, 0.0]
+weights_b = [0.1, 0.6, 0.3]
+threshold_a = 70
+threshold_b = 70
+
+sift_features = 200
+sift_ratio = 0.7
+orb_features = 1000
+orb_ratio = 0.8
+fft_target_size = [256, 256]
+
+k4_sample_count = 20
+image_glob = "*.tif"
+
+# Pesos del score final: k (%), k4 (%) y k5 (0 o 1)
+score_alpha = 0.5
+score_beta = 0.25
+score_gamma = 0.25

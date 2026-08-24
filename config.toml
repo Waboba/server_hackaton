@@ -1,0 +1,59 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# config.toml — Configuración del evento.
+# Edita este archivo antes de arrancar el servidor. No requiere tocar código.
+# ═══════════════════════════════════════════════════════════════════════════
+
+[event]
+title = "Hackathon"
+# Interruptor global: si es false, nadie puede entregar ni ejecutar.
+# También se puede abrir/cerrar en caliente desde el panel de admin.
+submissions_open = true
+
+
+[server]
+host = "0.0.0.0"          # 0.0.0.0 = escucha en toda la LAN
+port = 8000
+max_upload_mb = 2         # tamaño máximo por archivo subido
+
+
+[admin]
+# CAMBIA ESTA CONTRASEÑA ANTES DEL EVENTO.
+password = "hola321"
+# Si es true, además de la contraseña la MAC del dispositivo debe estar
+# marcada como admin. Es la configuración recomendada.
+require_admin_mac = true
+session_hours = 12
+
+
+[network]
+# Detección de dispositivos en la LAN (tabla ARP + barrido).
+enabled = true
+
+# "auto" detecta la interfaz y la subred del propio servidor.
+# Ejemplos explícitos: interface = "wlo1", subnet = "192.168.10.0/24"
+interface = "auto"
+subnet = "auto"
+
+scan_interval_secs = 20   # cada cuánto se barre la red
+miss_threshold = 3        # barridos fallidos seguidos antes de declarar desconexión
+ping_timeout_secs = 1
+max_parallel_pings = 64
+
+# Si arp-scan está instalado y el servidor corre como root, se usa
+# automáticamente (más rápido y fiable). Ponlo en false para forzar ping.
+prefer_arp_scan = true
+
+# Solo para desarrollo: MAC que se asume cuando la petición llega desde
+# localhost (127.0.0.1). Déjalo vacío en producción.
+dev_mac = "b0:dc:ef:27:b1:59"
+
+
+[execution]
+max_concurrent = 3        # evaluaciones en paralelo (= número de workers)
+build_timeout_secs = 300  # timeout del docker build
+keep_images = true        # false = borra la imagen del equipo tras cada run
+
+
+[paths]
+db = "data/hackathon.db"
+submissions = "data/submissions"

@@ -1,0 +1,40 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# devices.toml — Precarga de equipos y dispositivos (opcional).
+#
+# Se lee al arrancar el servidor y es ADITIVO: crea lo que falte y actualiza lo
+# que ya exista, pero nunca borra nada. Todo esto también se puede hacer desde
+# el panel de administración, en caliente.
+#
+# Para conocer la MAC de un dispositivo:
+#   Linux/macOS: ip link  /  ifconfig
+#   Windows:     ipconfig /all   (campo «Dirección física»)
+#   Android/iOS: Ajustes → Wi-Fi → (i) sobre la red
+#
+# IMPORTANTE: los móviles y portátiles recientes usan una MAC ALEATORIA por red.
+# Los participantes deben desactivar esa opción para la red del evento, o bien
+# registrar la MAC aleatoria concreta que su dispositivo muestre en esa red.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── Dispositivos del organizador ────────────────────────────────────────────
+# Con admin.require_admin_mac = true, solo estas MAC pueden entrar al panel
+# (además de la contraseña).
+
+[[admins]]
+mac = "b0:dc:ef:27:b1:59"
+label = "Portátil del organizador"
+
+
+# ── Equipos ─────────────────────────────────────────────────────────────────
+
+[[teams]]
+name = "Equipo Alpha"
+devices = [
+  { mac = "aa:bb:cc:11:22:33", label = "Portátil de Ana" },
+  { mac = "aa:bb:cc:44:55:66", label = "Portátil de Beto" },
+]
+
+[[teams]]
+name = "Equipo Beta"
+devices = [
+  { mac = "dd:ee:ff:77:88:99", label = "Sobremesa" },
+]
