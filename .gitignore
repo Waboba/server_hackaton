@@ -1,0 +1,6 @@
+# Archivos de Python
+*.pyc
+
+# Archivos de editor de código y sistema operativo
+.DS_Store/
+.vscode/
