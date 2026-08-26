@@ -1,5 +1,7 @@
 # Archivos de Python
 *.pyc
+__pycache__/
+.ipynb_checkpoints/
 
 # Archivos de editor de código y sistema operativo
 .DS_Store/
