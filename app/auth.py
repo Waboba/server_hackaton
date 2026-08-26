@@ -30,6 +30,7 @@ log = logging.getLogger(__name__)
 
 SESSION_COOKIE = "hack_admin"
 _SECRET_KEY = "admin_session_secret"
+_LOOPBACK = {"127.0.0.1", "::1", "localhost"}
 
 
 @dataclass
@@ -86,8 +87,15 @@ class Auth:
     # ── Resolución de la petición ─────────────────────────────────────────────
 
     def resolve_mac(self, ip: str) -> str | None:
-        if ip in ("127.0.0.1", "::1", "localhost"):
-            return NET_DEV_MAC or None
+        # Un equipo no tiene entrada ARP de sí mismo, así que las peticiones
+        # del propio servidor (por localhost o por su IP de la LAN) hay que
+        # resolverlas con sus interfaces. Pasa constantemente: el organizador
+        # suele abrir el panel en la misma máquina que sirve la web.
+        if ip in _LOOPBACK:
+            return NET_DEV_MAC or arp.primary_local_mac()
+        own = arp.local_ip_macs()
+        if ip in own:
+            return NET_DEV_MAC or own[ip]
         return arp.mac_for_ip(ip)
 
     def identify(self, ip: str, cookies: dict) -> Client:

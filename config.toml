@@ -30,22 +30,26 @@ session_hours = 12
 enabled = true
 
 # "auto" detecta la interfaz y la subred del propio servidor.
-# Ejemplos explícitos: interface = "wlo1", subnet = "192.168.10.0/24"
+# Nombre de interfaz: en Linux "wlo1", "eth0"; en Windows "Wi-Fi", "Ethernet"
+# (el mismo nombre que sale en `Get-NetIPAddress` o en Conexiones de red).
+# Fijar la subred a mano es lo más seguro si hay VPN o WSL por medio.
 interface = "auto"
-subnet = "auto"
+subnet = "auto"           # ej.: "192.168.10.0/24"
 
 scan_interval_secs = 20   # cada cuánto se barre la red
 miss_threshold = 3        # barridos fallidos seguidos antes de declarar desconexión
 ping_timeout_secs = 1
-max_parallel_pings = 64
+max_parallel_pings = 64   # en Windows cada ping es un proceso: no subas mucho de 64
 
 # Si arp-scan está instalado y el servidor corre como root, se usa
-# automáticamente (más rápido y fiable). Ponlo en false para forzar ping.
+# automáticamente (más rápido y fiable). Solo aplica en Linux; en Windows
+# siempre se barre con ping.
 prefer_arp_scan = true
 
-# Solo para desarrollo: MAC que se asume cuando la petición llega desde
-# localhost (127.0.0.1). Déjalo vacío en producción.
-dev_mac = "b0:dc:ef:27:b1:59"
+# Solo para desarrollo: fuerza esta MAC para las peticiones que vengan del
+# propio servidor. NO hace falta para que el organizador entre desde la
+# máquina servidor: eso ya funciona solo. Déjalo vacío en producción.
+dev_mac = ""
 
 
 [execution]

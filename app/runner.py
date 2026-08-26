@@ -106,7 +106,10 @@ def _prepare_context(problem, submission_dir: Path, tmp: Path):
     if dockerfile:
         shutil.copy(dockerfile, tmp / "Dockerfile")
     else:
-        (tmp / "Dockerfile").write_text(_generate_dockerfile(problem))
+        # newline="\n" a propósito: en Windows write_text pondría CRLF y las
+        # continuaciones de línea (\) del Dockerfile dejan de funcionar.
+        (tmp / "Dockerfile").write_text(_generate_dockerfile(problem),
+                                        newline="\n")
 
     shutil.copy(HARNESS, tmp / "harness.py")
     (tmp / "params.json").write_text(json.dumps(problem.params, indent=2))
@@ -134,7 +137,7 @@ def _prepare_context(problem, submission_dir: Path, tmp: Path):
         shutil.copy(src, submission_dst / name)
 
     (tmp / "requirements.txt").write_text(
-        filter_requirements(requirements_text, problem)
+        filter_requirements(requirements_text, problem), newline="\n"
     )
 
 
@@ -169,6 +172,18 @@ def build_image(problem, submission_dir: Path, tag: str, label: str = "") -> str
 # ── Ejecución ─────────────────────────────────────────────────────────────────
 
 
+def _mount_source(path: Path) -> str:
+    """
+    Ruta de host tal como la quiere `docker run -v`.
+
+    En Windows hay que dar 'C:/datos/k' y no 'C:\\datos\\k': Docker Desktop
+    acepta la barra normal, pero con la invertida trocea mal el argumento.
+    Además el disco tiene que estar compartido en Settings → Resources →
+    File sharing, o el contenedor verá el directorio vacío.
+    """
+    return str(path).replace("\\", "/")
+
+
 def run_container(problem, tag: str, label: str = "") -> tuple[dict, str]:
     limits = problem.limits
     datasets = problem.datasets
@@ -192,7 +207,7 @@ def run_container(problem, tag: str, label: str = "") -> tuple[dict, str]:
     mounted = {}
     for name, host_path in datasets.items():
         container_path = f"/data/{name}"
-        cmd += ["-v", f"{host_path}:{container_path}:ro"]
+        cmd += ["-v", f"{_mount_source(host_path)}:{container_path}:ro"]
         mounted[name] = container_path
         # Compatibilidad: también como variable de entorno individual
         cmd += ["-e", f"DATASET_{name.upper()}={container_path}"]

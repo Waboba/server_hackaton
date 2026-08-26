@@ -29,15 +29,18 @@ class Scanner:
     def __init__(self):
         self.interface, self.subnet = arp.guess_target(NET_INTERFACE, NET_SUBNET)
         self.method = self._choose_method()
-        log.info("Escáner de red: interfaz=%s subred=%s método=%s",
-                 self.interface, self.subnet, self.method)
+        log.info("Escáner de red: plataforma=%s interfaz=%s subred=%s método=%s",
+                 arp.PLATFORM, self.interface, self.subnet, self.method)
 
     def _choose_method(self) -> str:
-        if NET_PREFER_ARP_SCAN and shutil.which("arp-scan") and os.geteuid() == 0:
+        # arp-scan es solo de Unix; en Windows ni se busca (os.geteuid tampoco
+        # existe allí, así que la comprobación de root va aparte).
+        if not NET_PREFER_ARP_SCAN or not shutil.which("arp-scan"):
+            return "ping"
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
             return "arp-scan"
-        if NET_PREFER_ARP_SCAN and shutil.which("arp-scan"):
-            log.info("arp-scan está instalado pero el servidor no corre como root; "
-                     "se usará el barrido por ping.")
+        log.info("arp-scan está instalado pero el servidor no corre como root; "
+                 "se usará el barrido por ping.")
         return "ping"
 
     @property

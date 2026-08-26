@@ -67,12 +67,41 @@ desconexión en un historial que solo ve el administrador.
 | Python | 3.11 o superior (usa `tomllib`, de la librería estándar) |
 | Docker | El usuario que arranca el servidor debe poder ejecutar `docker` |
 | Red | El servidor debe estar en el **mismo segmento L2** que los participantes |
+| Sistema | Linux o Windows 10/11 |
 
 Comprueba Docker antes del evento:
 
 ```bash
 docker run --rm hello-world
 ```
+
+### Si el servidor corre en Windows
+
+Funciona igual, pero hay tres cosas que hay que hacer una vez:
+
+1. **Abrir el puerto en el firewall.** Sin esto nadie llega a la web. En
+   PowerShell **como administrador**:
+
+   ```powershell
+   New-NetFirewallRule -DisplayName "Hackathon" -Direction Inbound `
+       -Protocol TCP -LocalPort 8000 -Action Allow -Profile Private
+   ```
+
+   (Windows también lo ofrece en un diálogo la primera vez que arrancas el
+   servidor: hay que marcar «Redes privadas».)
+
+2. **Compartir el disco con Docker Desktop**, si los datasets están fuera del
+   proyecto: *Settings → Resources → File sharing*. Si no, el contenedor los
+   verá vacíos.
+
+3. **Arrancar con `py`**, que es como se llama el lanzador de Python en Windows:
+
+   ```powershell
+   py run_server.py
+   ```
+
+Detectar los dispositivos no necesita permisos de administrador: se barre con
+`ping` y se lee el caché ARP con `arp -a`.
 
 ### 2. Configurar `config.toml`
 
@@ -232,6 +261,7 @@ bot_simula/
 │   ├── auth.py            identificación por MAC y sesión de admin
 │   ├── events.py          bus de eventos para SSE
 │   ├── network/           arp.py · scanner.py · monitor.py
+│   │                      platform_linux.py / platform_windows.py
 │   └── web/               http.py · html.py · routes_team.py · routes_admin.py · server.py
 ├── problems/
 │   ├── fingerprint/       el reto de huellas
@@ -280,11 +310,22 @@ Otros límites conocidos:
 
 **«No se pudo determinar la dirección MAC de tu dispositivo»**
 El cliente no está en el mismo segmento L2, o el AP tiene aislamiento de
-clientes. Comprueba con `ip neigh show` en el servidor si aparece su IP.
+clientes. Comprueba en el servidor si aparece su IP: `ip neigh show` en Linux,
+`arp -a` en Windows. Si el servidor tampoco puede hacerle ping, es aislamiento
+de clientes del punto de acceso.
 
 **El monitor de red sale como «detenido» en el panel**
 Revisa `[network]` en `config.toml`: `enabled = true` y una `subnet` válida. Si
-`subnet = "auto"` no acierta (por ejemplo con VPN activa), fíjala a mano.
+`subnet = "auto"` no acierta (VPN activa, o WSL/VirtualBox en Windows), fíjala
+a mano junto con `interface`. La línea `Escáner de red: plataforma=… subred=…`
+del arranque dice exactamente qué eligió.
+
+**Los equipos no llegan ni a cargar la página**
+Es el firewall del servidor, no la aplicación. En Windows, la regla de entrada
+del apartado [Si el servidor corre en Windows](#si-el-servidor-corre-en-windows);
+en Linux con ufw, `sudo ufw allow 8000/tcp`. Se distingue fácil: si el
+navegador da *timeout* es el firewall, y si carga una página roja de «acceso
+no autorizado» el firewall ya está bien y lo que falla es la MAC.
 
 **Las evaluaciones fallan con «Falló la construcción de la imagen Docker»**
 Casi siempre es un paquete de `requirements.txt` del equipo. El log completo del

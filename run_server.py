@@ -19,6 +19,14 @@ def main() -> int:
               f"(tienes {sys.version.split()[0]})", file=sys.stderr)
         return 1
 
+    # La consola de Windows usa cp1252 por defecto: sin esto, el banner y los
+    # mensajes con acentos revientan con UnicodeEncodeError.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         level=logging.INFO,

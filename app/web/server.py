@@ -15,7 +15,7 @@ from app import problems
 from app.auth import Auth
 from app.network.arp import normalize_mac
 from app.config import (
-    DEVICES_FILE, EVENT_TITLE, HOST, MAX_UPLOAD_BYTES, PORT,
+    DEVICES_FILE, EVENT_TITLE, HOST, MAX_UPLOAD_BYTES, NET_DEV_MAC, PORT,
     SUBMISSIONS_OPEN_DEFAULT,
 )
 from app.db import Database
@@ -208,6 +208,7 @@ def run():
         log.info("  Equipos: %s", url)
         log.info("  Admin:   %s/admin", url)
     log.info("═" * 62)
+    _report_own_mac(ctx.db)
 
     try:
         server.serve_forever()
@@ -221,9 +222,38 @@ def run():
         server.server_close()
 
 
+def _report_own_mac(db: Database):
+    """
+    Avisa de la MAC del propio servidor y de si puede entrar al panel.
+
+    Sin esto es fácil quedarse encerrado: el organizador suele abrir el panel
+    en la misma máquina que sirve la web, y si esa MAC no está marcada como
+    admin no puede entrar... ni entrar a darla de alta.
+    """
+    from app.network.arp import primary_local_mac
+
+    mac = NET_DEV_MAC or primary_local_mac()
+    if not mac:
+        log.warning("No se pudo determinar la MAC de este servidor. Si necesitas "
+                    "administrarlo desde aquí, ponla a mano en network.dev_mac.")
+        return
+
+    device = db.get_device(mac)
+    if device and device.get("is_admin"):
+        log.info("  Este servidor es %s (admin: sí)", mac)
+        return
+
+    log.warning("  Este servidor es %s, y NO está dado de alta como admin.", mac)
+    log.warning("  Para poder entrar en /admin desde esta misma máquina, añade "
+                "esto a %s y reinicia:", DEVICES_FILE.name)
+    log.warning('      [[admins]]')
+    log.warning('      mac = "%s"', mac)
+    log.warning('      label = "Servidor"')
+
+
 def _local_urls() -> list[str]:
     from app.network.arp import local_networks
     if HOST not in ("0.0.0.0", "::"):
         return [f"http://{HOST}:{PORT}"]
-    urls = [f"http://{ip}:{PORT}" for _, ip, _ in local_networks()]
+    urls = [f"http://{iface.ip}:{PORT}" for iface in local_networks()]
     return urls or [f"http://localhost:{PORT}"]
