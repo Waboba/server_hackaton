@@ -1,0 +1,6 @@
+# Paquetes extra para tu solución, uno por línea.
+# numpy YA está instalado: no hace falta declararlo y no cuenta para el
+# límite de paquetes.
+#
+# Ejemplo:
+# numba==0.60.0

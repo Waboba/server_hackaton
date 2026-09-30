@@ -1,0 +1,114 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Laboratorio «Algoritmos estocásticos usando cadenas de Markov»
+# Problema 2.2.3 — Reinas(beta, k, M0): k pasos de la cadena de Markov con
+# medida invariante pi(M) ∝ exp(-beta R(M)).
+#
+# Se puntúa SOLO el tiempo de ejecución. Los tiempos objetivo de cada
+# instancia están en [[params.instancias]] → objetivo_secs y los fija el
+# organizador antes del evento (0 = umbral desactivado).
+# ═══════════════════════════════════════════════════════════════════════════
+
+slug = "reinas"
+title = "N-Reinas 2.3 — Reinas(beta, k, M0)"
+description = "k pasos de la cadena sobre tableros de N reinas, lo más rápido posible. El score es el tiempo."
+enabled = true
+ranking = "best"
+
+statement = """
+Entrega un solution.py que defina:
+
+    def Reinas(beta, k, M0)
+
+Debe construir k pasos de la cadena de Markov que elegiste en el punto 2 del
+enunciado (Metropolis-Hastings o Glauber sobre tableros de N x N con N reinas,
+con medida invariante pi(M) ∝ exp(-beta R(M))) partiendo de M0, y devolver el
+estado final.
+
+  beta   temperatura inversa
+  k      número de pasos de la cadena
+  M0     numpy array N x N con valores en {0,1} y exactamente N unos.
+         N se deduce de M0: en las instancias hay una reina por fila.
+
+Tu cadena debe moverse dentro del espacio de tableros con exactamente N reinas.
+
+QUÉ SE MIDE
+  Tu función se llama UNA vez por instancia y se cronometra. El score es el
+  tiempo total en negativo, así que el más rápido queda primero en el ranking.
+  La construcción de M0 no cuenta: se hace fuera del cronómetro.
+
+  instancia    N     beta     k
+  chica        8     1.0       50 000
+  media       16     2.0      100 000
+  grande      32     2.0      100 000
+
+LÍMITE DE TIEMPO
+  Cada instancia tiene un tiempo objetivo anunciado por el organizador. Si una
+  instancia supera 3x su objetivo, la llamada se interrumpe, no se ejecutan las
+  instancias restantes y el run no puntúa.
+
+  Se cronometra tiempo de pared, con 1 CPU y sin red dentro del contenedor.
+  numpy está instalado.
+
+  La correctitud NO se verifica aquí: se revisa en el informe del laboratorio.
+"""
+
+
+[submission]
+max_packages = 5
+preinstalled = ["numpy"]
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "Reinas"
+help = "debe definir Reinas(beta, k, M0) y devolver el tablero tras k pasos"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra (numpy ya viene instalado)"
+
+
+[datasets]
+
+
+[limits]
+timeout_secs = 600
+memory = "2g"
+cpus = "1"
+pids = 128
+cooldown_mins = 1
+
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = []
+pip_packages = ["numpy"]
+
+
+[params]
+semilla = 20260930
+umbral_factor = 3.0
+
+# objetivo_secs = 0.0 → sin umbral. PONER LOS TIEMPOS ANTES DEL EVENTO.
+[[params.instancias]]
+nombre = "chica"
+N = 8
+beta = 1.0
+k = 50000
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "media"
+N = 16
+beta = 2.0
+k = 100000
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "grande"
+N = 32
+beta = 2.0
+k = 100000
+objetivo_secs = 0.0

@@ -1,0 +1,137 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Laboratorio «Algoritmos estocásticos usando cadenas de Markov»
+# Problema 2.1.1 — biomasa(S, L, U, j): resuelve el problema [Interior].
+#
+# Se puntúa SOLO el tiempo de ejecución. Los tiempos objetivo de cada
+# instancia están en [[params.instancias]] → objetivo_secs y los fija el
+# organizador antes del evento (0 = umbral desactivado).
+#
+# REQUIERE los datos de material docente en problems/_datos_knockeos/
+# (ver el README de esa carpeta).
+# ═══════════════════════════════════════════════════════════════════════════
+
+slug = "biomasa"
+title = "Knockeos 1.1 — biomasa(S, L, U, j)"
+description = "Resuelve el LP [Interior] lo más rápido posible. El score es el tiempo."
+enabled = true
+ranking = "best"
+
+statement = """
+Entrega un solution.py que defina:
+
+    def biomasa(S, L, U, j)
+
+Debe resolver el problema [Interior] del enunciado
+
+    max  v_biomasa
+    s.a. S v = 0
+         L_i <= v_i <= U_i   para todo i
+
+y devolver el óptimo y el valor de v_j en el óptimo, o None (o algo que
+distinga el caso) si el problema es infactible.
+
+  S      numpy array N x M (metabolitos x reacciones), cargado del dataset
+  L, U   numpy arrays de largo M con las cotas ya multiplicadas por y
+  j      índice de la reacción cuyo flujo hay que reportar
+
+Índices del vector de flujos (los mismos del enunciado): biomasa = 1520,
+alcohol = 472. En las instancias j es siempre la reacción de alcohol.
+
+QUÉ SE MIDE
+  Cada instancia es un conjunto de llamadas a biomasa con las MISMAS S y j pero
+  con cotas L, U distintas: en cada llamada se anulan al azar unas cuantas
+  reacciones (L_i = U_i = 0), que es justo lo que hace un knockeo. Se cronometra
+  el bucle completo. Las cotas se preparan antes, fuera del cronómetro.
+
+  instancia    llamadas    reacciones anuladas por llamada
+  chica               1                                  0
+  media               5                                  2
+  grande             20                                  3
+
+  El score es el tiempo total de las tres instancias en negativo, así que el más
+  rápido queda primero en el ranking.
+
+  Algunas combinaciones pueden salir infactibles: tu función debe manejarlo sin
+  lanzar excepción (una excepción corta el run).
+
+LÍMITE DE TIEMPO
+  Cada instancia tiene un tiempo objetivo anunciado por el organizador. Si una
+  instancia supera 3x su objetivo, la llamada se interrumpe, no se ejecutan las
+  instancias restantes y el run no puntúa.
+
+  Se cronometra tiempo de pared, con 1 CPU y sin red dentro del contenedor.
+  numpy y scipy están instalados (scipy.optimize.linprog usa HiGHS).
+
+  La correctitud NO se verifica aquí: se revisa en el informe del laboratorio.
+"""
+
+
+[submission]
+max_packages = 5
+preinstalled = ["numpy", "scipy"]
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "biomasa"
+help = "debe definir biomasa(S, L, U, j) y devolver (óptimo, v_j) o None si es infactible"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra (numpy y scipy ya vienen instalados)"
+
+
+# ── Datasets (read-only en /data/knockeos) ──────────────────────────────────
+# Copia S_matriz.npy, L.npy y U.npy en problems/_datos_knockeos/
+
+[datasets]
+knockeos = "../_datos_knockeos"
+
+
+[limits]
+timeout_secs = 600
+memory = "3g"
+cpus = "1"
+pids = 256
+cooldown_mins = 2
+
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = []
+pip_packages = ["numpy", "scipy"]
+
+
+[params]
+semilla = 20260930
+umbral_factor = 3.0
+
+# Índices en el vector de flujos, según el enunciado. VERIFICAR con los datos.
+indice_biomasa = 1520
+indice_alcohol = 472
+eta = 0.1152                 # 0.288 * 0.4, por si el evaluador lo necesita
+
+archivo_S = "S_matriz.npy"
+archivo_L = "L.npy"
+archivo_U = "U.npy"
+
+# objetivo_secs = 0.0 → sin umbral. PONER LOS TIEMPOS ANTES DEL EVENTO.
+[[params.instancias]]
+nombre = "chica"
+llamadas = 1
+anuladas = 0
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "media"
+llamadas = 5
+anuladas = 2
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "grande"
+llamadas = 20
+anuladas = 3
+objetivo_secs = 0.0

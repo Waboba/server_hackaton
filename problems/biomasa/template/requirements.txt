@@ -1,0 +1,6 @@
+# Paquetes extra para tu solución, uno por línea.
+# numpy y scipy YA están instalados: no hace falta declararlos y no cuentan
+# para el límite de paquetes.
+#
+# Ejemplo:
+# highspy==1.7.2

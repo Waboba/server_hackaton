@@ -1,0 +1,123 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Laboratorio «Algoritmos estocásticos usando cadenas de Markov»
+# Problema 1.2 — IsingMH: modelo de Ising por Metropolis-Hastings.
+#
+# Se puntúa SOLO el tiempo de ejecución. Los tiempos objetivo de cada
+# instancia están en [[params.instancias]] → objetivo_secs y los fija el
+# organizador antes del evento (0 = umbral desactivado).
+# ═══════════════════════════════════════════════════════════════════════════
+
+slug = "ising_mh"
+title = "Ising 1.2 — Metropolis-Hastings"
+description = "IsingMH(N, beta, nf, X0) lo más rápido posible. El score es el tiempo."
+enabled = true
+
+# "best" = cuenta el mejor run del equipo (aquí: el más rápido válido)
+ranking = "best"
+
+statement = """
+Entrega un solution.py que defina:
+
+    def IsingMH(N, beta, nf, X0)
+
+Debe devolver el estado de la cadena de Markov del punto 1 del enunciado
+(caminata aleatoria uniforme en {-1,1}^G + Metropolis-Hastings) después de nf
+pasos, partiendo de X0.
+
+  N      el grafo es la grilla N x N  (L = H = N)
+  beta   temperatura inversa
+  nf     número de pasos de la cadena
+  X0     numpy array N x N de enteros con valores en {-1, 1}
+
+Condición de borde + / · / + / · : en X0 las columnas 0 y N-1 vienen todas a
++1 y son el borde fijo; tu cadena no debe actualizarlas. Las filas de arriba y
+abajo son libres.
+
+QUÉ SE MIDE
+  Tu función se llama UNA vez por instancia y se cronometra. El score es el
+  tiempo total en negativo, así que el más rápido queda primero en el ranking.
+  La construcción de X0 no cuenta: se hace fuera del cronómetro.
+
+  instancia   N     beta                  nf
+  chica      16     0.4                     200 000
+  media      32     ln(1+sqrt2)/2           800 000
+  grande     64     0.5                   4 000 000
+
+LÍMITE DE TIEMPO
+  Cada instancia tiene un tiempo objetivo anunciado por el organizador. Si una
+  instancia supera 3x su objetivo, la llamada se interrumpe, no se ejecutan las
+  instancias restantes y el run no puntúa. Lo verás en la página del run.
+
+  Ojo: se cronometra tiempo de pared, con 1 CPU y sin red dentro del
+  contenedor. numpy está instalado.
+
+  La correctitud del algoritmo NO se verifica aquí: se revisa en el informe del
+  laboratorio. Entregar algo que no simula la cadena es, obviamente, entregar
+  mal el laboratorio.
+"""
+
+
+# ── Qué entregan los participantes ──────────────────────────────────────────
+
+[submission]
+max_packages = 5
+preinstalled = ["numpy"]
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "IsingMH"
+help = "debe definir IsingMH(N, beta, nf, X0) y devolver el estado tras nf pasos"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra (numpy ya viene instalado)"
+
+
+# Sin datasets: las instancias se generan en el evaluador.
+[datasets]
+
+
+[limits]
+timeout_secs = 600
+memory = "2g"
+cpus = "1"
+pids = 128
+cooldown_mins = 1
+
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = []
+pip_packages = ["numpy"]
+
+
+# ── Parámetros del evaluador ────────────────────────────────────────────────
+
+[params]
+semilla = 20260930
+umbral_factor = 3.0        # se corta al superar este múltiplo del objetivo
+
+# objetivo_secs = 0.0 → sin umbral. PONER LOS TIEMPOS ANTES DEL EVENTO.
+[[params.instancias]]
+nombre = "chica"
+N = 16
+beta = 0.4
+nf = 200000
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "media"
+N = 32
+beta = 0.4406867935          # ln(1+sqrt(2))/2, temperatura crítica
+nf = 800000
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "grande"
+N = 64
+beta = 0.5
+nf = 4000000
+objetivo_secs = 0.0

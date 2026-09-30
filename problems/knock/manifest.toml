@@ -1,0 +1,148 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Laboratorio «Algoritmos estocásticos usando cadenas de Markov»
+# Problema 2.1.3 — Knock(beta, n, y0, K): n pasos de la cadena sobre
+# combinaciones de K nutrientes suprimidos.
+#
+# Se puntúa SOLO el tiempo de ejecución. Los tiempos objetivo de cada
+# instancia están en [[params.instancias]] → objetivo_secs y los fija el
+# organizador antes del evento (0 = umbral desactivado).
+#
+# REQUIERE los datos de material docente en problems/_datos_knockeos/
+# (ver el README de esa carpeta).
+# ═══════════════════════════════════════════════════════════════════════════
+
+slug = "knock"
+title = "Knockeos 1.3 — Knock(beta, n, y0, K)"
+description = "n pasos de la cadena sobre combinaciones de K knockeos, lo más rápido posible. El score es el tiempo."
+enabled = true
+ranking = "best"
+
+statement = """
+Entrega un solution.py que defina:
+
+    def Knock(beta, n, y0, K)
+
+Debe construir n pasos de la cadena de Markov que elegiste en el punto 2 del
+enunciado, sobre el espacio de combinaciones de K nutrientes suprimidos, con
+medida invariante pi(y) ∝ exp(-beta E(y)), partiendo de y0, y devolver el
+estado final.
+
+  beta   temperatura inversa
+  n      número de pasos de la cadena
+  y0     numpy array de largo M con valores en {0,1} y exactamente K ceros
+         (los ceros son los nutrientes suprimidos)
+  K      número de supresiones, sum(1 - y) <= K
+
+DÓNDE ESTÁN LOS DATOS
+  Tu solution.py carga S, L y U por su cuenta. Dentro del contenedor están
+  montados read-only en:
+
+      /data/knockeos/S_matriz.npy
+      /data/knockeos/L.npy
+      /data/knockeos/U.npy
+
+  La ruta de la carpeta también viene en la variable de entorno
+  DATASET_KNOCKEOS. Cárgalos a nivel de módulo: el import de tu solution.py
+  ocurre FUERA del cronómetro, la llamada a Knock no. Si los cargas dentro de
+  Knock, ese tiempo cuenta.
+
+  Índices del vector de flujos (los mismos del enunciado): biomasa = 1520,
+  alcohol = 472, eta = 0.288 * 0.4.
+
+QUÉ SE MIDE
+  Tu función se llama UNA vez por instancia y se cronometra. El score es el
+  tiempo total en negativo, así que el más rápido queda primero en el ranking.
+  La construcción de y0 no cuenta: se hace fuera del cronómetro.
+
+  instancia    K     n     beta
+  chica        2     5     0.5
+  media        3    15     1.0
+  grande       5    30     1.0
+
+  Las combinaciones infactibles (E(y) = infinito) son parte del problema: tu
+  código debe manejarlas sin lanzar excepción (una excepción corta el run).
+
+LÍMITE DE TIEMPO
+  Cada instancia tiene un tiempo objetivo anunciado por el organizador. Si una
+  instancia supera 3x su objetivo, la llamada se interrumpe, no se ejecutan las
+  instancias restantes y el run no puntúa.
+
+  Se cronometra tiempo de pared, con 1 CPU y sin red dentro del contenedor.
+  numpy y scipy están instalados (scipy.optimize.linprog usa HiGHS).
+
+  La correctitud NO se verifica aquí: se revisa en el informe del laboratorio.
+"""
+
+
+[submission]
+max_packages = 5
+preinstalled = ["numpy", "scipy"]
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "Knock"
+help = "debe definir Knock(beta, n, y0, K) y devolver el y final tras n pasos"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra (numpy y scipy ya vienen instalados)"
+
+
+# ── Datasets (read-only en /data/knockeos) ──────────────────────────────────
+# Copia S_matriz.npy, L.npy y U.npy en problems/_datos_knockeos/
+
+[datasets]
+knockeos = "../_datos_knockeos"
+
+
+[limits]
+timeout_secs = 900
+memory = "3g"
+cpus = "1"
+pids = 256
+cooldown_mins = 3
+
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = []
+pip_packages = ["numpy", "scipy"]
+
+
+[params]
+semilla = 20260930
+umbral_factor = 3.0
+
+# Índices en el vector de flujos, según el enunciado. VERIFICAR con los datos.
+indice_biomasa = 1520
+indice_alcohol = 472
+eta = 0.1152                 # 0.288 * 0.4
+
+archivo_S = "S_matriz.npy"
+archivo_L = "L.npy"
+archivo_U = "U.npy"
+
+# objetivo_secs = 0.0 → sin umbral. PONER LOS TIEMPOS ANTES DEL EVENTO.
+[[params.instancias]]
+nombre = "chica"
+K = 2
+n = 5
+beta = 0.5
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "media"
+K = 3
+n = 15
+beta = 1.0
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "grande"
+K = 5
+n = 30
+beta = 1.0
+objetivo_secs = 0.0

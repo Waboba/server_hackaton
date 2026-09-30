@@ -1,0 +1,107 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Laboratorio «Algoritmos estocásticos usando cadenas de Markov»
+# Problema 2.2.1 — Vistas(Tablero): cuenta R(M) en un tablero de N reinas.
+#
+# Se puntúa SOLO el tiempo de ejecución. Los tiempos objetivo de cada
+# instancia están en [[params.instancias]] → objetivo_secs y los fija el
+# organizador antes del evento (0 = umbral desactivado).
+# ═══════════════════════════════════════════════════════════════════════════
+
+slug = "reinas_vistas"
+title = "N-Reinas 2.1 — Vistas(Tablero)"
+description = "Vistas(Tablero) lo más rápido posible sobre lotes de tableros. El score es el tiempo."
+enabled = true
+ranking = "best"
+
+statement = """
+Entrega un solution.py que defina:
+
+    def Vistas(Tablero)
+
+Tablero es un numpy array N x N con valores en {0, 1} y exactamente N unos
+(las reinas). Para cada reina se cuenta el número de OTRAS reinas en su misma
+fila, columna o diagonal; Vistas debe devolver R(M), la suma de esas cantidades
+sobre todas las reinas. (Cada par que se ve aporta 2 a R(M), es decir
+R(M) = 2*I(M).)
+
+QUÉ SE MIDE
+  Como una sola llamada es demasiado rápida para cronometrarla, cada instancia
+  es un LOTE de tableros: se cronometra el bucle que llama a Vistas una vez por
+  tablero. Los tableros se generan antes, fuera del cronómetro.
+
+  instancia    N     tableros en el lote
+  chica        8     100 000
+  media       64       3 000
+  grande     256          100
+
+  El score es el tiempo total de los tres lotes en negativo, así que el más
+  rápido queda primero en el ranking.
+
+LÍMITE DE TIEMPO
+  Cada instancia tiene un tiempo objetivo anunciado por el organizador. Si una
+  instancia supera 3x su objetivo, la llamada se interrumpe, no se ejecutan las
+  instancias restantes y el run no puntúa.
+
+  Se cronometra tiempo de pared, con 1 CPU y sin red dentro del contenedor.
+  numpy está instalado.
+
+  La correctitud NO se verifica aquí: se revisa en el informe del laboratorio.
+"""
+
+
+[submission]
+max_packages = 5
+preinstalled = ["numpy"]
+blocked_packages = []
+
+[[submission.files]]
+name = "solution.py"
+required = true
+must_define = "Vistas"
+help = "debe definir Vistas(Tablero) y devolver R(M)"
+
+[[submission.files]]
+name = "requirements.txt"
+required = false
+help = "paquetes extra (numpy ya viene instalado)"
+
+
+[datasets]
+
+
+[limits]
+timeout_secs = 600
+memory = "2g"
+cpus = "1"
+pids = 128
+cooldown_mins = 1
+
+
+[docker]
+base_image = "python:3.11-slim"
+apt_packages = []
+pip_packages = ["numpy"]
+
+
+[params]
+semilla = 20260930
+umbral_factor = 3.0
+
+# objetivo_secs = 0.0 → sin umbral. PONER LOS TIEMPOS ANTES DEL EVENTO.
+[[params.instancias]]
+nombre = "chica"
+N = 8
+tableros = 100000
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "media"
+N = 64
+tableros = 3000
+objetivo_secs = 0.0
+
+[[params.instancias]]
+nombre = "grande"
+N = 256
+tableros = 100
+objetivo_secs = 0.0
